@@ -1,4 +1,4 @@
-# HuffTree: Compactação de arquivos - Huffman Algorithm
+# FileCompressor: Compactação de arquivos - Huffman Algorithm
 
 ## Membros do grupo
 - Antônio Caetano Neves Neto

@@ -1,4 +1,4 @@
-# TP: Compactação de arquivos - Huffman Algorithm
+# HuffTree: Compactação de arquivos - Huffman Algorithm
 
 ## Membros do grupo
 - Antônio Caetano Neves Neto

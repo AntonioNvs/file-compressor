@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FileCompressor — Compressor Huffman</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 60px auto;
+            padding: 0 20px;
+            background-color: #f5f5f5;
+        }
+        h1 { color: #333; }
+        form {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        input[type="file"] { margin: 12px 0; }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background-color: #45a049; }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            border-left: 4px solid #c62828;
+        }
+    </style>
+</head>
+<body>
+    <h1>FileCompressor</h1>
+    <p>Compressão de arquivos de texto usando o algoritmo de Huffman.</p>
+
+    {% if error %}
+    <div class="error" id="error-message">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/upload" enctype="multipart/form-data" id="upload-form">
+        <label for="file-input"><strong>Selecione um arquivo de texto:</strong></label><br />
+        <input type="file" name="file" id="file-input" accept=".txt,.md,.csv,.log,.py,.json,.xml,.html" /><br />
+        <button type="submit" id="submit-btn">Comprimir</button>
+    </form>
+</body>
+</html>

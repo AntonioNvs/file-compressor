@@ -1,5 +1,7 @@
 # FileCompressor: Compactação de arquivos - Huffman Algorithm
 
+[![codecov](https://codecov.io/gh/AntonioNvs/file-compressor/graph/badge.svg)](https://codecov.io/gh/AntonioNvs/file-compressor)
+
 ## Membros do grupo
 - Antônio Caetano Neves Neto
 - Bernardo Dutra Lemos

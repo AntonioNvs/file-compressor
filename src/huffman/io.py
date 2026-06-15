@@ -28,3 +28,24 @@ def write_compressed(path: str, tree: Node | None, bitstring: str):
         f.write(tree_bytes)
         f.write(struct.pack('>B', padding_length))
         f.write(body_bytes)
+
+def deserialize_tree(data: bytes) -> Node | None:
+    return None
+
+def read_compressed(path: str) -> tuple[Node | None, str]:
+    """
+    Lê a árvore e a string de bits de um arquivo binário .huff.
+    """
+    with open(path, 'rb') as f:
+        tree_len = struct.unpack('>I', f.read(4))[0]
+        tree_bytes = f.read(tree_len)
+        tree = deserialize_tree(tree_bytes)
+        
+        padding_length = struct.unpack('>B', f.read(1))[0]
+        body_bytes = f.read()
+        
+    bitstring = "".join(f"{b:08b}" for b in body_bytes)
+    if padding_length > 0:
+        bitstring = bitstring[:-padding_length]
+        
+    return tree, bitstring

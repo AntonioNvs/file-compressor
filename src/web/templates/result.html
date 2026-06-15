@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resultado da Compressão — FileCompressor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 60px auto;
+            padding: 0 20px;
+            background-color: #f5f5f5;
+        }
+        h1 { color: #333; }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #555; }
+        .stat-value { font-weight: bold; color: #222; }
+        .ratio-highlight {
+            font-size: 2rem;
+            color: #4CAF50;
+            font-weight: bold;
+            text-align: center;
+            padding: 12px 0;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #1976D2;
+            color: white;
+            padding: 10px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 15px;
+            margin-right: 10px;
+        }
+        .btn:hover { background-color: #1565C0; }
+        .btn-secondary {
+            background-color: #757575;
+        }
+        .btn-secondary:hover { background-color: #616161; }
+    </style>
+</head>
+<body>
+    <h1>Compressão Concluída!</h1>
+
+    <div class="card">
+        <div class="ratio-highlight" id="compression-ratio">
+            {{ ratio }}% reduzido
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Arquivo original</span>
+            <span class="stat-value" id="original-size">{{ original_size }} bytes</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Arquivo comprimido</span>
+            <span class="stat-value" id="compressed-size">{{ compressed_size }} bytes</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Nome do arquivo</span>
+            <span class="stat-value" id="filename">{{ filename }}</span>
+        </div>
+    </div>
+
+    <a href="/download/{{ filename }}" class="btn" id="download-btn">⬇ Baixar arquivo .huff</a>
+    <a href="/" class="btn btn-secondary" id="back-btn">← Comprimir outro arquivo</a>
+</body>
+</html>

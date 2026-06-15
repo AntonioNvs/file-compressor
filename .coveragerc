@@ -1,0 +1,12 @@
+[run]
+source = src
+branch = True
+
+[report]
+omit =
+    */__init__.py
+
+exclude_lines =
+    pragma: no cover
+    import 
+    from .* import 

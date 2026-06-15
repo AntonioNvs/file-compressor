@@ -106,3 +106,10 @@ def test_upload_binary_file(client):
         content_type="multipart/form-data",
     )
     assert response.status_code in (302, 400)
+
+
+@pytest.mark.integration
+def test_download_nonexistent_file_returns_404(client):
+    """GET /download/<inexistente> retorna 404."""
+    response = client.get("/download/arquivo_que_nao_existe.huff")
+    assert response.status_code == 404

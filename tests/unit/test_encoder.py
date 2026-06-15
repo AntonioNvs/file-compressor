@@ -119,3 +119,10 @@ def test_stats_on_empty():
     assert stats["original_size"] == 0
     assert stats["compressed_size"] == 0
     assert stats["ratio"] == 0.0
+
+@pytest.mark.unit
+def test_stats_tree_size_positive():
+    """get_stats retorna tree_size > 0 para texto com múltiplos caracteres."""
+    from src.huffman.encoder import get_stats
+    stats = get_stats("abcdefghij")
+    assert stats["tree_size"] > 0

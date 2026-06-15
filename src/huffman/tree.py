@@ -31,8 +31,6 @@ def generate_codes(root: Node | None) -> dict[str, str]:
         if not node:
             return
         if node.char is not None:
-            # Se for folha, salva o código
-            # Se a string inteira tinha apenas um caractere distinto (current_code vazio)
             codes[node.char] = current_code if current_code else "0"
             return
             

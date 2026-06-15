@@ -12,3 +12,11 @@ class Node:
         if not isinstance(other, Node):
             return NotImplemented
         return self.freq < other.freq
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Node):
+            return NotImplemented
+        return (self.char == other.char and 
+                self.freq == other.freq and 
+                self.left == other.left and 
+                self.right == other.right)

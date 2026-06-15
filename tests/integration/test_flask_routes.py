@@ -113,3 +113,19 @@ def test_download_nonexistent_file_returns_404(client):
     """GET /download/<inexistente> retorna 404."""
     response = client.get("/download/arquivo_que_nao_existe.huff")
     assert response.status_code == 404
+
+
+@pytest.mark.integration
+def test_upload_unsupported_extension(client):
+    """POST /upload com extensão não suportada (.bin) — redireciona com erro."""
+    data = {
+        "file": (io.BytesIO(b"fake binary data"), "archive.bin"),
+    }
+    response = client.post(
+        "/upload",
+        data=data,
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert b"suportado" in response.data or b"suporte" in response.data or response.status_code in (302, 400)

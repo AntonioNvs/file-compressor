@@ -88,4 +88,9 @@ def download(filename: str):
     if not os.path.isfile(file_path):
         abort(404)
 
-    return send_file(file_path, as_attachment=True, download_name=filename)
+    return send_file(
+        file_path,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/octet-stream",
+    )

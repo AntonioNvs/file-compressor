@@ -29,6 +29,13 @@ def upload():
     if file.filename == "":
         return redirect(url_for("main.index", error="Nome de arquivo vazio."))
 
+    ALLOWED_EXTENSIONS = {".txt", ".md", ".csv", ".log", ".py", ".json", ".xml", ".html"}
+    _, ext = os.path.splitext(file.filename.lower())
+    if ext and ext not in ALLOWED_EXTENSIONS:
+        return redirect(
+            url_for("main.index", error=f"Tipo de arquivo não suportado: '{ext}'. Envie um arquivo de texto.")
+        )
+
     try:
         text = file.read().decode("utf-8")
     except (UnicodeDecodeError, Exception):

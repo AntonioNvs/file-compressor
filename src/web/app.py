@@ -25,6 +25,7 @@ def create_app(config: dict | None = None) -> Flask:
     return app
 
 
-if __name__ == "__main__":
-    application = create_app()
-    application.run(debug=True)
+# Para rodar a aplicação, use a partir da raiz do projeto:
+#   python run.py
+# ou:
+#   python -m src.web.app

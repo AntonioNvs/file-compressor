@@ -3,6 +3,8 @@
 [![CI](https://github.com/AntonioNvs/file-compressor/actions/workflows/ci.yml/badge.svg)](https://github.com/AntonioNvs/file-compressor/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/AntonioNvs/file-compressor/graph/badge.svg)](https://codecov.io/gh/AntonioNvs/file-compressor)
 
+**Repositório:** [https://github.com/AntonioNvs/file-compressor](https://github.com/AntonioNvs/file-compressor)
+
 ## Membros do grupo
 - Antônio Caetano Neves Neto
 - Bernardo Dutra Lemos

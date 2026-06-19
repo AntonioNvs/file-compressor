@@ -22,12 +22,26 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         
+    - name: Install Chromium (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y chromium-browser
+
+    - name: Install Chromium (macOS)
+      if: runner.os == 'macOS'
+      run: brew install chromium
+
+    - name: Install Chromium (Windows)
+      if: runner.os == 'Windows'
+      run: choco install chromium
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
     - name: Run tests with pytest
+      env:
+        HEADLESS: "true"
       run: |
         pytest --cov=src --cov-report=xml
         

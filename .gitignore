@@ -5,3 +5,7 @@ __pycache__/
 .pytest_cache/
 htmlcov/
 *.huff
+coverage.xml
+geckodriver.log
+*.png
+src/web/uploads/

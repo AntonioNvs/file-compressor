@@ -77,3 +77,24 @@ def test_download_compressed_file_via_web_ui(driver, base_url, tmp_path, downloa
     assert downloaded_file is not None, "File was not downloaded"
     assert downloaded_file.endswith(".huff")
     assert os.path.getsize(downloaded_file) > 0, "Downloaded file is empty"
+
+def test_error_case_on_invalid_upload(driver, base_url):
+    # (1) Acessa página index
+    driver.get(base_url)
+    
+    # (2) Clica submit sem selecionar arquivo
+    submit_btn = driver.find_element(By.ID, "submit-btn")
+    submit_btn.click()
+    
+    # (3) Verifica que uma mensagem de erro é exibida na página
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "error-message"))
+    )
+    
+    error_msg = driver.find_element(By.ID, "error-message").text
+    assert len(error_msg) > 0
+    
+    # Opcional: testar upload de arquivo com extensão inválida
+    # Como as restrições HTML (accept) podem não barrar o envio via Selenium 
+    # ou testar de 0 bytes, vamos apenas validar o envio vazio, que é o essencial
+    # exigido na task.

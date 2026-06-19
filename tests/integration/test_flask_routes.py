@@ -129,3 +129,20 @@ def test_upload_unsupported_extension(client):
     )
     assert response.status_code == 200
     assert b"suportado" in response.data or b"suporte" in response.data or response.status_code in (302, 400)
+
+@pytest.mark.integration
+def test_upload_invalid_utf8_txt_file(client):
+    """POST /upload com arquivo .txt mas com bytes inválidos para UTF-8."""
+    # 0xC0 0x00 is invalid utf-8
+    invalid_utf8_content = b'\xC0\x00\xFF'
+    data = {
+        "file": (io.BytesIO(invalid_utf8_content), "invalid_utf8.txt"),
+    }
+    response = client.post(
+        "/upload",
+        data=data,
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert b"UTF-8" in response.data or b"inv\xc3\xa1lido" in response.data

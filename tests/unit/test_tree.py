@@ -71,3 +71,13 @@ def test_variable_length():
     # "d" tem maior frequência, deve ter o menor ou igual código em relação aos outros
     # E "a" deve ser maior ou igual a "d" (com certeza será maior num caso tão extremo)
     assert len(codes["d"]) < len(codes["a"])
+
+@pytest.mark.unit
+def test_build_tree_empty_freqs():
+    root = build_tree({})
+    assert root is None
+
+@pytest.mark.unit
+def test_generate_codes_none_root():
+    codes = generate_codes(None)
+    assert codes == {}

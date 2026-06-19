@@ -147,3 +147,61 @@ def test_full_happy_path_end_to_end(driver, base_url, tmp_path, download_dir):
     decoded_text = decode(bitstring, tree)
     
     assert decoded_text == original_text, "Decompressed text does not match original"
+
+def test_ui_elements_and_navigation(driver, base_url, tmp_path):
+    # (1) Verifica elementos na página index
+    driver.get(base_url)
+    
+    # Verifica título principal
+    h1 = driver.find_element(By.TAG_NAME, "h1")
+    assert "FileCompressor" in h1.text
+    
+    # Verifica presença do formulário e seus componentes
+    assert driver.find_element(By.ID, "upload-form").is_displayed()
+    file_input = driver.find_element(By.ID, "file-input")
+    assert file_input.is_displayed()
+    
+    submit_btn = driver.find_element(By.ID, "submit-btn")
+    assert submit_btn.is_displayed()
+    assert submit_btn.is_enabled()
+    
+    # (2) Realiza o upload para navegar até a página de resultado
+    test_file = tmp_path / "nav_test.txt"
+    test_file.write_text("Testing navigation")
+    
+    file_input.send_keys(str(test_file))
+    submit_btn.click()
+    
+    # Aguarda o carregamento da página de resultado
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "back-btn"))
+    )
+    
+    # Verifica elementos na página de resultado
+    result_h1 = driver.find_element(By.TAG_NAME, "h1")
+    assert "Compressão Concluída" in result_h1.text
+    
+    assert driver.find_element(By.ID, "compression-ratio").is_displayed()
+    assert driver.find_element(By.ID, "original-size").is_displayed()
+    assert driver.find_element(By.ID, "compressed-size").is_displayed()
+    assert driver.find_element(By.ID, "filename").is_displayed()
+    
+    download_btn = driver.find_element(By.ID, "download-btn")
+    assert download_btn.is_displayed()
+    assert download_btn.is_enabled()
+    
+    back_btn = driver.find_element(By.ID, "back-btn")
+    assert back_btn.is_displayed()
+    assert back_btn.is_enabled()
+    
+    # (3) Navega de volta para index
+    back_btn.click()
+    
+    # Aguarda retornar ao index
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "upload-form"))
+    )
+    
+    # Verifica que retornou ao index
+    index_h1 = driver.find_element(By.TAG_NAME, "h1")
+    assert "FileCompressor" in index_h1.text

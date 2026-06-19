@@ -79,3 +79,9 @@ def test_large_input_roundtrip():
         assert restored_bits == bitstring
     finally:
         os.unlink(path)
+
+@pytest.mark.unit
+def test_read_non_existent_file():
+    """Testa leitura de arquivo inexistente (caminho de erro)."""
+    with pytest.raises(FileNotFoundError):
+        read_compressed("non_existent_file_that_should_not_exist.huff")

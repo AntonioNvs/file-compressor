@@ -40,3 +40,19 @@ Para executar a suíte de testes do projeto e verificar a cobertura do código l
    ```bash
    pytest --cov=src
    ```
+
+### Testes End-to-End (E2E)
+
+Para rodar os testes end-to-end simulando interações reais do usuário no navegador:
+
+1. Certifique-se de que o **Chrome/Chromium** e o respectivo **ChromeDriver** estão instalados no seu sistema.
+2. Com as dependências instaladas (`pip install -r requirements.txt`), inicie o servidor Flask em um terminal separado:
+   ```bash
+   python -m src.web.app
+   ```
+3. Em outro terminal, execute a suíte de testes E2E com o Pytest:
+   ```bash
+   pytest tests/e2e/ -v
+   ```
+
+*Nota: Os testes E2E estão configurados para executar o Chrome em modo headless por padrão, não abrindo uma janela visual do navegador.*

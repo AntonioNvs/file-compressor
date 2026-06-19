@@ -1,6 +1,8 @@
 import os
 import time
 import pytest
+from src.huffman.io import read_compressed
+from src.huffman.decoder import decode
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -98,3 +100,50 @@ def test_error_case_on_invalid_upload(driver, base_url):
     # Como as restrições HTML (accept) podem não barrar o envio via Selenium 
     # ou testar de 0 bytes, vamos apenas validar o envio vazio, que é o essencial
     # exigido na task.
+
+def test_full_happy_path_end_to_end(driver, base_url, tmp_path, download_dir):
+    original_text = "This is a full happy path test for Huffman compression. Repeating some characters to ensure compression is effective: aaaaa bbbbb ccccc 11111 22222."
+    
+    # (1) Acessa index e prepara arquivo
+    test_file = tmp_path / "happy_path.txt"
+    test_file.write_text(original_text)
+    
+    driver.get(base_url)
+    
+    # (2) Faz upload de um arquivo de texto com conteúdo conhecido
+    file_input = driver.find_element(By.ID, "file-input")
+    file_input.send_keys(str(test_file))
+    
+    submit_btn = driver.find_element(By.ID, "submit-btn")
+    submit_btn.click()
+    
+    # (3) Verifica estatísticas na página de resultado
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "original-size"))
+    )
+    original_size = driver.find_element(By.ID, "original-size").text
+    compressed_size = driver.find_element(By.ID, "compressed-size").text
+    assert "bytes" in original_size
+    assert "bytes" in compressed_size
+    
+    # (4) Faz download do arquivo comprimido
+    download_btn = driver.find_element(By.ID, "download-btn")
+    download_btn.click()
+    
+    downloaded_file = None
+    for _ in range(10):
+        files = os.listdir(download_dir)
+        huff_files = [f for f in files if f.endswith(".huff")]
+        if huff_files:
+            downloaded_file = os.path.join(download_dir, huff_files[0])
+            if os.path.getsize(downloaded_file) > 0:
+                break
+        time.sleep(0.5)
+        
+    assert downloaded_file is not None, "File was not downloaded in happy path"
+    
+    # (5) Lê o arquivo baixado, descomprime programaticamente e verifica
+    tree, bitstring = read_compressed(downloaded_file)
+    decoded_text = decode(bitstring, tree)
+    
+    assert decoded_text == original_text, "Decompressed text does not match original"

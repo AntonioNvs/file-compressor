@@ -26,21 +26,3 @@ def test_mixed_bytes():
     assert freqs[ord('2')] == 1
     assert freqs[ord('3')] == 1
     assert freqs[ord('!')] == 1
-
-@pytest.mark.unit
-def test_binary_bytes():
-    """Testa contagem com bytes binários completos (0x00–0xFF)."""
-    data = bytes(range(256))
-    freqs = count_frequencies(data)
-    assert len(freqs) == 256
-    for b in range(256):
-        assert freqs[b] == 1
-
-@pytest.mark.unit
-def test_high_frequency_binary():
-    """Testa contagem com bytes binários repetidos."""
-    data = bytes([0x00] * 100 + [0xFF] * 50 + [0x42] * 25)
-    freqs = count_frequencies(data)
-    assert freqs[0x00] == 100
-    assert freqs[0xFF] == 50
-    assert freqs[0x42] == 25

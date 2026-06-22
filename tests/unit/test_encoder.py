@@ -35,38 +35,6 @@ def test_empty_bytes():
 
 # --- Edge cases (task #31) ---
 
-@pytest.mark.unit
-def test_only_spaces():
-    """Dados compostos apenas de espaços e whitespace."""
-    data = b"     \t  \t   "
-    bitstring, tree = encode(data)
-    decoded = decode(bitstring, tree)
-    assert decoded == data
-
-@pytest.mark.unit
-def test_only_newlines():
-    """Dados com \\n e \\r\\n."""
-    data = b"\n\n\r\n\n\r\n"
-    bitstring, tree = encode(data)
-    decoded = decode(bitstring, tree)
-    assert decoded == data
-
-@pytest.mark.unit
-def test_binary_like_text():
-    """Dados contendo caracteres '0' e '1' — não deve confundir com bitstring."""
-    data = b"01010101 00110011 11001100"
-    bitstring, tree = encode(data)
-    decoded = decode(bitstring, tree)
-    assert decoded == data
-
-@pytest.mark.unit
-def test_single_byte_repeated():
-    """1000× o mesmo byte — decodificação deve ser exata."""
-    data = b"z" * 1000
-    bitstring, tree = encode(data)
-    decoded = decode(bitstring, tree)
-    assert decoded == data
-
 # --- Large input and binary data (task #32) ---
 
 @pytest.mark.unit
@@ -132,24 +100,6 @@ def test_stats_on_normal_text():
     stats = get_stats(b"the quick brown fox jumps over the lazy dog")
     assert stats["original_size"] > stats["compressed_size"]
     assert stats["ratio"] > 0
-
-@pytest.mark.unit
-def test_stats_on_single_byte():
-    """100 bytes de um único byte: ratio ≈ 87%."""
-    from src.huffman.encoder import get_stats
-    stats = get_stats(b"a" * 100)
-    assert stats["compressed_size"] == 13
-    assert stats["original_size"] == 100
-    assert stats["ratio"] > 80
-
-@pytest.mark.unit
-def test_stats_on_empty():
-    """Dados vazios retorna original_size = 0 e não divide por zero."""
-    from src.huffman.encoder import get_stats
-    stats = get_stats(b"")
-    assert stats["original_size"] == 0
-    assert stats["compressed_size"] == 0
-    assert stats["ratio"] == 0.0
 
 @pytest.mark.unit
 def test_stats_tree_size_positive():

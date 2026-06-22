@@ -3,6 +3,7 @@ import time
 import pytest
 from src.huffman.io import read_compressed
 from src.huffman.decoder import decode
+from src.huffman.rle import rle_decode
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -137,7 +138,7 @@ def test_full_happy_path_end_to_end(driver, base_url, tmp_path, download_dir):
     
     # (5) Lê o arquivo baixado, descomprime programaticamente e verifica
     tree, bitstring, original_name = read_compressed(downloaded_file)
-    decoded_data = decode(bitstring, tree)
+    decoded_data = rle_decode(decode(bitstring, tree))
     
     assert decoded_data == original_text.encode("utf-8"), "Decompressed data does not match original"
 

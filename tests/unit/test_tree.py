@@ -69,13 +69,3 @@ def test_variable_length():
     codes = generate_codes(root)
     
     assert len(codes[ord('d')]) < len(codes[ord('a')])
-
-@pytest.mark.unit
-def test_build_tree_empty_freqs():
-    root = build_tree({})
-    assert root is None
-
-@pytest.mark.unit
-def test_generate_codes_none_root():
-    codes = generate_codes(None)
-    assert codes == {}

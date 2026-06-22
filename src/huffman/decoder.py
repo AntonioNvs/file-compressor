@@ -1,15 +1,16 @@
 from src.huffman.node import Node
 
-def decode(bitstring: str, root: Node | None) -> str:
+def decode(bitstring: str, root: Node | None) -> bytes:
     """
     Decodifica uma string de bits usando a árvore de Huffman fornecida.
+    Retorna os bytes originais reconstruídos.
     """
     if not bitstring or not root:
-        return ""
+        return b""
         
-    # Caso especial: árvore com apenas um nó folha (apenas um caractere distinto no texto)
+    # Caso especial: árvore com apenas um nó folha (apenas um byte distinto nos dados)
     if root.left is None and root.right is None:
-        return root.char * len(bitstring)
+        return bytes([root.byte_val] * len(bitstring))
         
     decoded = []
     current = root
@@ -20,8 +21,8 @@ def decode(bitstring: str, root: Node | None) -> str:
         else:
             current = current.right
             
-        if current.char is not None:
-            decoded.append(current.char)
+        if current.byte_val is not None:
+            decoded.append(current.byte_val)
             current = root
             
-    return "".join(decoded)
+    return bytes(decoded)

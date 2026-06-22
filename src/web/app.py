@@ -13,7 +13,7 @@ def create_app(config: dict | None = None) -> Flask:
     os.makedirs(upload_folder, exist_ok=True)
 
     app.config["UPLOAD_FOLDER"] = upload_folder
-    app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB
+    app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024  # 32 MB
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-key")
 
     if config:

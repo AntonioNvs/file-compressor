@@ -6,6 +6,7 @@
 **Repositório:** [https://github.com/AntonioNvs/file-compressor](https://github.com/AntonioNvs/file-compressor)
 
 ## Membros do grupo
+
 - Antônio Caetano Neves Neto
 - Bernardo Dutra Lemos
 - Raphael Aroldo Carreiro Mendes
@@ -19,7 +20,7 @@ Sistema de compactação de arquivos de texto feito em Python + Interface Gráfi
 - **Huffman**: Algoritmo central utilizado para realizar a compactação de texto baseada na frequência dos caracteres.
 - **Flask**: Criação da API de submissão dos arquivos e download dos mesmos, atuando como o *backend* para execução do Huffman e *frontend* para as páginas HTML.
 - **Pytest**: Automatiza os testes unitários e de integração do sistema.
-- **Coverage**: Usado para medir a cobertura de testes do código fonte (meta de >90%).
+- **Coverage**: Usado para medir a cobertura de testes do código fonte (meta de >90% geral).
 - **Selenium**: Automatização de testes *end-to-end* da interface gráfica web, simulando interações reais de usuário no browser.
 - **GitHub Actions**: Plataforma de CI/CD utilizada para rodar os testes automaticamente em uma matriz de múltiplos sistemas operacionais (Linux, macOS, Windows) e versões do Python.
 - **Codecov**: Ferramenta integrada ao CI para armazenar, analisar e disponibilizar publicamente o relatório de cobertura gerado pelos testes.
@@ -29,33 +30,35 @@ Sistema de compactação de arquivos de texto feito em Python + Interface Gráfi
 Para iniciar a aplicação no seu computador e acessá-la no navegador:
 
 1. **Instale as dependências** do projeto:
+
    ```bash
    pip install -r requirements.txt
    ```
-
 2. **Inicie o servidor Flask**:
    Na raiz do projeto, execute:
+
    ```bash
    python run.py
    ```
-
 3. **Acesse no navegador**:
    Abra o navegador e acesse a URL: [http://localhost:5000](http://localhost:5000)
 
 ## Como rodar os testes
+
 Para executar a suíte de testes do projeto e verificar a cobertura do código localmente, siga as instruções abaixo:
 
 1. **Instale as dependências** do projeto:
+
    ```bash
    pip install -r requirements.txt
    ```
-
 2. **Execute os testes** com o Pytest:
+
    ```bash
    pytest
    ```
-
 3. **Verifique a cobertura** de código:
+
    ```bash
    pytest --cov=src
    ```

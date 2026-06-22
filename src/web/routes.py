@@ -1,9 +1,10 @@
 import os
 from flask import Blueprint, request, redirect, url_for, render_template, send_file, abort, current_app
 
-from src.huffman.encoder import encode, get_stats
+from src.huffman.encoder import encode
 from src.huffman.io import write_compressed
 from src.huffman.decompressor import decompress_file
+from src.huffman.rle import rle_encode
 
 bp = Blueprint("main", __name__)
 
@@ -54,8 +55,9 @@ def upload():
     if len(data) == 0:
         return redirect(url_for("main.index", error="O arquivo está vazio."))
 
-    bitstring, tree = encode(data)
-    stats = get_stats(data)
+    # Pipeline: RLE → Huffman
+    rle_data = rle_encode(data)
+    bitstring, tree = encode(rle_data)
 
     original_filename = file.filename if file.filename else "output.bin"
     base_name = os.path.splitext(original_filename)[0]
@@ -64,13 +66,18 @@ def upload():
 
     write_compressed(output_path, tree, bitstring, original_filename)
 
+    # Estatísticas reais
+    original_size = len(data)
+    compressed_size = os.path.getsize(output_path)
+    ratio = round((1 - compressed_size / original_size) * 100, 2) if original_size > 0 else 0.0
+
     return redirect(
         url_for(
             "main.result",
             filename=output_filename,
-            original_size=stats["original_size"],
-            compressed_size=stats["compressed_size"],
-            ratio=round(stats["ratio"], 2),
+            original_size=original_size,
+            compressed_size=compressed_size,
+            ratio=ratio,
             mode="compress",
         )
     )

@@ -1,5 +1,6 @@
 """
 Testes unitários para o módulo de descompactação (decompressor.py).
+Dados são comprimidos com RLE+Huffman para corresponder ao pipeline real.
 """
 import os
 import tempfile
@@ -7,13 +8,15 @@ import pytest
 from src.huffman.encoder import encode
 from src.huffman.io import write_compressed
 from src.huffman.decompressor import decompress_file
+from src.huffman.rle import rle_encode
 
 
 @pytest.mark.unit
 def test_decompress_text_file():
     """Descompacta um arquivo de texto e verifica conteúdo restaurado."""
     original_data = b"hello world, this is a test for decompression!"
-    bitstring, tree = encode(original_data)
+    rle_data = rle_encode(original_data)
+    bitstring, tree = encode(rle_data)
     
     with tempfile.TemporaryDirectory() as tmpdir:
         huff_path = os.path.join(tmpdir, "test.huff")
@@ -33,7 +36,8 @@ def test_decompress_text_file():
 def test_decompress_binary_file():
     """Descompacta dados binários e verifica integridade."""
     original_data = bytes(range(256)) * 10
-    bitstring, tree = encode(original_data)
+    rle_data = rle_encode(original_data)
+    bitstring, tree = encode(rle_data)
     
     with tempfile.TemporaryDirectory() as tmpdir:
         huff_path = os.path.join(tmpdir, "binary.huff")
@@ -51,7 +55,8 @@ def test_decompress_binary_file():
 def test_decompress_preserves_filename():
     """Verifica que o nome original é restaurado corretamente."""
     original_data = b"some pdf content"
-    bitstring, tree = encode(original_data)
+    rle_data = rle_encode(original_data)
+    bitstring, tree = encode(rle_data)
     
     with tempfile.TemporaryDirectory() as tmpdir:
         huff_path = os.path.join(tmpdir, "compressed.huff")
@@ -67,7 +72,8 @@ def test_decompress_preserves_filename():
 def test_decompress_stats_correct():
     """Verifica que as estatísticas de descompactação são corretas."""
     original_data = b"aaaa bbbb cccc dddd" * 100
-    bitstring, tree = encode(original_data)
+    rle_data = rle_encode(original_data)
+    bitstring, tree = encode(rle_data)
     
     with tempfile.TemporaryDirectory() as tmpdir:
         huff_path = os.path.join(tmpdir, "stats_test.huff")

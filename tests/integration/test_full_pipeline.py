@@ -4,51 +4,53 @@ import pytest
 from src.huffman.encoder import encode
 from src.huffman.decoder import decode
 from src.huffman.io import write_compressed, read_compressed
+from src.huffman.decompressor import decompress_file
 
 
 @pytest.mark.integration
 def test_full_compress_decompress_pipeline():
     """
     Pipeline completo sem interface web:
-    texto → encode → write_compressed → read_compressed → decode → texto original.
+    bytes → encode → write_compressed → read_compressed → decode → bytes originais.
     """
-    original_text = (
+    original_data = (
         "A compressão de Huffman é um algoritmo de compressão de dados sem perda. "
         "Ela usa uma árvore binária para atribuir códigos mais curtos aos símbolos "
         "mais frequentes e códigos mais longos aos menos frequentes."
-    )
+    ).encode("utf-8")
 
-    bitstring, tree = encode(original_text)
+    bitstring, tree = encode(original_data)
 
     with tempfile.NamedTemporaryFile(suffix=".huff", delete=False) as tmp:
         path = tmp.name
 
     try:
-        write_compressed(path, tree, bitstring)
+        write_compressed(path, tree, bitstring, "texto.txt")
 
-        restored_tree, restored_bits = read_compressed(path)
-        decoded_text = decode(restored_bits, restored_tree)
+        restored_tree, restored_bits, original_name = read_compressed(path)
+        decoded_data = decode(restored_bits, restored_tree)
 
-        assert decoded_text == original_text
+        assert decoded_data == original_data
+        assert original_name == "texto.txt"
     finally:
         os.unlink(path)
 
 
 @pytest.mark.integration
 def test_pipeline_with_unicode_text():
-    """Pipeline completo com texto Unicode (acentos, emojis)."""
-    original_text = "Olá, mundo! Hoje o céu está nublado. ☁️🌧️"
+    """Pipeline completo com texto Unicode (acentos, emojis) como bytes."""
+    original_data = "Olá, mundo! Hoje o céu está nublado. ☁️🌧️".encode("utf-8")
 
-    bitstring, tree = encode(original_text)
+    bitstring, tree = encode(original_data)
 
     with tempfile.NamedTemporaryFile(suffix=".huff", delete=False) as tmp:
         path = tmp.name
 
     try:
-        write_compressed(path, tree, bitstring)
-        restored_tree, restored_bits = read_compressed(path)
-        decoded_text = decode(restored_bits, restored_tree)
-        assert decoded_text == original_text
+        write_compressed(path, tree, bitstring, "unicode.txt")
+        restored_tree, restored_bits, _ = read_compressed(path)
+        decoded_data = decode(restored_bits, restored_tree)
+        assert decoded_data == original_data
     finally:
         os.unlink(path)
 
@@ -57,16 +59,14 @@ def test_pipeline_with_unicode_text():
 def test_pipeline_compression_is_effective():
     """Verifica que a compressão realmente reduz o tamanho para texto natural."""
     import random
-    import string
 
     random.seed(0)
-    # Texto com distribuição não-uniforme (compressão deve ser efetiva)
-    original_text = ("aaaa bbbb cccc " * 200) + "".join(
+    original_data = (("aaaa bbbb cccc " * 200) + "".join(
         random.choices("abcde ", k=500)
-    )
+    )).encode("utf-8")
 
-    bitstring, tree = encode(original_text)
-    original_size = len(original_text.encode("utf-8"))
+    bitstring, tree = encode(original_data)
+    original_size = len(original_data)
     compressed_size = (len(bitstring) + 7) // 8
 
     assert compressed_size < original_size, (
@@ -80,33 +80,25 @@ def test_large_file_pipeline():
     import string
     
     random.seed(42)
-    # Gera ~100KB de texto com repetições para garantir boa compressão
     words = ["huffman", "compressao", "dados", "arvore", "binaria", "eficiente", "texto", "algoritmo", "python"]
     original_text = " ".join(random.choices(words, k=15000)) + " " + "".join(random.choices(string.ascii_letters, k=5000))
+    original_data = original_text.encode("utf-8")
     
-    # Compressão
-    bitstring, tree = encode(original_text)
+    bitstring, tree = encode(original_data)
     
     with tempfile.NamedTemporaryFile(suffix=".huff", delete=False) as tmp:
         path = tmp.name
         
     try:
-        # Escrita binária
-        write_compressed(path, tree, bitstring)
+        write_compressed(path, tree, bitstring, "large_text.txt")
         
-        # Leitura binária
-        restored_tree, restored_bits = read_compressed(path)
+        restored_tree, restored_bits, _ = read_compressed(path)
+        decoded_data = decode(restored_bits, restored_tree)
         
-        # Descompressão
-        decoded_text = decode(restored_bits, restored_tree)
+        assert decoded_data == original_data
         
-        # Verificação de integridade
-        assert decoded_text == original_text
-        
-        # Verificação da taxa de compressão (> 40%)
-        original_size = len(original_text.encode("utf-8"))
+        original_size = len(original_data)
         compressed_size = os.path.getsize(path)
-        
         compression_ratio = (original_size - compressed_size) / original_size
         
         assert original_size >= 100000, f"Tamanho original é apenas {original_size} bytes"
@@ -114,3 +106,72 @@ def test_large_file_pipeline():
         
     finally:
         os.unlink(path)
+
+
+# --- Binary file pipelines ---
+
+@pytest.mark.integration
+def test_binary_file_pipeline():
+    """Pipeline completo com dados binários puros (simulando imagem)."""
+    import random
+    random.seed(123)
+    
+    # Simula header PNG + dados binários
+    original_data = b"\x89PNG\r\n\x1a\n" + bytes(random.randint(0, 255) for _ in range(2000))
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        huff_path = os.path.join(tmpdir, "image.huff")
+        
+        bitstring, tree = encode(original_data)
+        write_compressed(huff_path, tree, bitstring, "photo.png")
+        
+        restored_path, stats = decompress_file(huff_path, tmpdir)
+        
+        with open(restored_path, 'rb') as f:
+            restored_data = f.read()
+        
+        assert restored_data == original_data
+        assert os.path.basename(restored_path) == "photo.png"
+
+
+@pytest.mark.integration
+def test_pdf_pipeline():
+    """Pipeline completo com dados simulando um PDF."""
+    original_data = b"%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n>>\nendobj\n" + b"\x00\xFF" * 500
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        huff_path = os.path.join(tmpdir, "doc.huff")
+        
+        bitstring, tree = encode(original_data)
+        write_compressed(huff_path, tree, bitstring, "relatorio.pdf")
+        
+        restored_path, stats = decompress_file(huff_path, tmpdir)
+        
+        with open(restored_path, 'rb') as f:
+            restored_data = f.read()
+        
+        assert restored_data == original_data
+        assert stats["original_filename"] == "relatorio.pdf"
+
+
+@pytest.mark.integration
+def test_audio_pipeline():
+    """Pipeline completo com dados simulando um arquivo WAV."""
+    import struct
+    # Simula um WAV header mínimo + dados
+    wav_header = b"RIFF" + struct.pack('<I', 1000) + b"WAVEfmt " + struct.pack('<I', 16)
+    original_data = wav_header + bytes(range(256)) * 4
+    
+    with tempfile.TemporaryDirectory() as tmpdir:
+        huff_path = os.path.join(tmpdir, "audio.huff")
+        
+        bitstring, tree = encode(original_data)
+        write_compressed(huff_path, tree, bitstring, "musica.wav")
+        
+        restored_path, stats = decompress_file(huff_path, tmpdir)
+        
+        with open(restored_path, 'rb') as f:
+            restored_data = f.read()
+        
+        assert restored_data == original_data
+        assert stats["original_filename"] == "musica.wav"

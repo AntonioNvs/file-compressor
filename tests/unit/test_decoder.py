@@ -5,21 +5,21 @@ from src.huffman.node import Node
 
 @pytest.mark.unit
 def test_roundtrip_simple():
-    original = "hello world"
+    original = b"hello world"
     bitstring, tree = encode(original)
     decoded = decode(bitstring, tree)
     assert decoded == original
 
 @pytest.mark.unit
 def test_roundtrip_phrase():
-    original = "This is a much longer phrase, with punctuation! And it has numbers like 1, 2, 3."
+    original = b"This is a much longer phrase, with punctuation! And it has numbers like 1, 2, 3."
     bitstring, tree = encode(original)
     decoded = decode(bitstring, tree)
     assert decoded == original
 
 @pytest.mark.unit
-def test_roundtrip_unicode():
-    original = "coração é vida! 🌟"
+def test_roundtrip_unicode_bytes():
+    original = "coração é vida! 🌟".encode("utf-8")
     bitstring, tree = encode(original)
     decoded = decode(bitstring, tree)
     assert decoded == original
@@ -27,29 +27,51 @@ def test_roundtrip_unicode():
 @pytest.mark.unit
 def test_empty_input():
     decoded = decode("", None)
-    assert decoded == ""
+    assert decoded == b""
 
 @pytest.mark.unit
 def test_degenerate_tree():
-    # Tree with only left children (e.g., frequencies: A=1, B=2)
-    # A -> 00, B -> 01
-    root = Node(char=None, freq=3, 
-                left=Node(char=None, freq=2, 
-                          left=Node(char='A', freq=1), 
-                          right=Node(char='B', freq=1)), 
-                right=Node(char=None, freq=0))
-    # Test valid decode
-    assert decode("0001", root) == "AB"
+    root = Node(byte_val=None, freq=3, 
+                left=Node(byte_val=None, freq=2, 
+                          left=Node(byte_val=ord('A'), freq=1), 
+                          right=Node(byte_val=ord('B'), freq=1)), 
+                right=Node(byte_val=None, freq=0))
+    assert decode("0001", root) == b"AB"
 
 @pytest.mark.unit
 def test_incomplete_bitstring():
-    root = Node(char=None, freq=2,
-                left=Node(char=None, freq=1, 
-                          left=Node(char='A', freq=1), 
-                          right=Node(char='B', freq=1)),
-                right=Node(char='C', freq=1))
-    # C=1, A=00, B=01
-    # '0' goes to left child but doesn't reach a leaf. 
-    # Decode ignores incomplete character.
-    assert decode("0", root) == ""
-    assert decode("10", root) == "C" # 1 decodes C, 0 is incomplete
+    root = Node(byte_val=None, freq=2,
+                left=Node(byte_val=None, freq=1, 
+                          left=Node(byte_val=ord('A'), freq=1), 
+                          right=Node(byte_val=ord('B'), freq=1)),
+                right=Node(byte_val=ord('C'), freq=1))
+    assert decode("0", root) == b""
+    assert decode("10", root) == b"C"
+
+# --- Binary roundtrip tests ---
+
+@pytest.mark.unit
+def test_roundtrip_binary_data():
+    """Roundtrip com dados binários puros."""
+    original = bytes(range(256))
+    bitstring, tree = encode(original)
+    decoded = decode(bitstring, tree)
+    assert decoded == original
+
+@pytest.mark.unit
+def test_roundtrip_null_bytes():
+    """Roundtrip com bytes nulos."""
+    original = b"\x00\x00\x00\x01\x01\x02"
+    bitstring, tree = encode(original)
+    decoded = decode(bitstring, tree)
+    assert decoded == original
+
+@pytest.mark.unit
+def test_roundtrip_large_binary():
+    """Roundtrip com 5000 bytes binários aleatórios."""
+    import random
+    random.seed(77)
+    original = bytes(random.randint(0, 255) for _ in range(5000))
+    bitstring, tree = encode(original)
+    decoded = decode(bitstring, tree)
+    assert decoded == original

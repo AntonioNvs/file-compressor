@@ -22,6 +22,7 @@ def test_upload_route_success(client, tmp_path):
     content = b"the quick brown fox jumps over the lazy dog"
     data = {
         "file": (io.BytesIO(content), "sample.txt"),
+        "category": "text",
     }
     response = client.post(
         "/upload",
@@ -40,6 +41,7 @@ def test_download_route_success(client, tmp_path):
     content = b"hello huffman compression world"
     data = {
         "file": (io.BytesIO(content), "testfile.txt"),
+        "category": "text",
     }
     client.post(
         "/upload",
@@ -60,7 +62,7 @@ def test_download_route_success(client, tmp_path):
 @pytest.mark.integration
 def test_upload_no_file(client):
     """POST /upload sem arquivo — espera redirect com mensagem de erro."""
-    response = client.post("/upload", data={}, content_type="multipart/form-data")
+    response = client.post("/upload", data={"category": "text"}, content_type="multipart/form-data")
     assert response.status_code in (302, 400)
 
 
@@ -69,6 +71,7 @@ def test_upload_empty_filename(client):
     """POST /upload com filename vazio — espera redirect com mensagem de erro."""
     data = {
         "file": (io.BytesIO(b"some content"), ""),
+        "category": "text",
     }
     response = client.post(
         "/upload",
@@ -83,21 +86,7 @@ def test_upload_empty_file(client):
     """POST /upload com arquivo de 0 bytes — espera redirect de erro."""
     data = {
         "file": (io.BytesIO(b""), "empty.txt"),
-    }
-    response = client.post(
-        "/upload",
-        data=data,
-        content_type="multipart/form-data",
-    )
-    assert response.status_code in (302, 400)
-
-
-@pytest.mark.integration
-def test_upload_binary_file(client):
-    """POST /upload com arquivo binário não-texto — espera tratamento de erro."""
-    binary_content = bytes(range(256))
-    data = {
-        "file": (io.BytesIO(binary_content), "binary.bin"),
+        "category": "text",
     }
     response = client.post(
         "/upload",
@@ -115,10 +104,11 @@ def test_download_nonexistent_file_returns_404(client):
 
 
 @pytest.mark.integration
-def test_upload_unsupported_extension(client):
-    """POST /upload com extensão não suportada (.bin) — redireciona com erro."""
+def test_upload_wrong_extension_for_category(client):
+    """POST /upload com extensão incompatível com a categoria — redireciona com erro."""
     data = {
         "file": (io.BytesIO(b"fake binary data"), "archive.bin"),
+        "category": "text",
     }
     response = client.post(
         "/upload",
@@ -127,15 +117,14 @@ def test_upload_unsupported_extension(client):
         follow_redirects=True,
     )
     assert response.status_code == 200
-    assert b"suportado" in response.data or b"suporte" in response.data or response.status_code in (302, 400)
+    assert b"suportado" in response.data or b"suporte" in response.data
 
 @pytest.mark.integration
-def test_upload_invalid_utf8_txt_file(client):
-    """POST /upload com arquivo .txt mas com bytes inválidos para UTF-8."""
-    # 0xC0 0x00 is invalid utf-8
-    invalid_utf8_content = b'\xC0\x00\xFF'
+def test_upload_invalid_category(client):
+    """POST /upload com categoria inválida — redireciona com erro."""
     data = {
-        "file": (io.BytesIO(invalid_utf8_content), "invalid_utf8.txt"),
+        "file": (io.BytesIO(b"some content"), "test.txt"),
+        "category": "invalid_category",
     }
     response = client.post(
         "/upload",
@@ -144,4 +133,114 @@ def test_upload_invalid_utf8_txt_file(client):
         follow_redirects=True,
     )
     assert response.status_code == 200
-    assert b"UTF-8" in response.data or b"inv\xc3\xa1lido" in response.data
+    assert b"inv" in response.data.lower()
+
+
+# --- Upload por categoria ---
+
+@pytest.mark.integration
+def test_upload_pdf_category(client, tmp_path):
+    """POST /upload com categoria PDF — aceita arquivo .pdf."""
+    content = b"%PDF-1.4 fake pdf content for testing"
+    data = {
+        "file": (io.BytesIO(content), "document.pdf"),
+        "category": "pdf",
+    }
+    response = client.post(
+        "/upload",
+        data=data,
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    huff_files = list(tmp_path.glob("*.huff"))
+    assert len(huff_files) == 1
+
+
+@pytest.mark.integration
+def test_upload_image_category(client, tmp_path):
+    """POST /upload com categoria imagem — aceita arquivo .png."""
+    content = b"\x89PNG\r\n\x1a\n fake png content"
+    data = {
+        "file": (io.BytesIO(content), "photo.png"),
+        "category": "image",
+    }
+    response = client.post(
+        "/upload",
+        data=data,
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    huff_files = list(tmp_path.glob("*.huff"))
+    assert len(huff_files) == 1
+
+
+@pytest.mark.integration
+def test_upload_audio_category(client, tmp_path):
+    """POST /upload com categoria áudio — aceita arquivo .mp3."""
+    content = b"ID3\x04\x00 fake mp3 content for testing"
+    data = {
+        "file": (io.BytesIO(content), "song.mp3"),
+        "category": "audio",
+    }
+    response = client.post(
+        "/upload",
+        data=data,
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    huff_files = list(tmp_path.glob("*.huff"))
+    assert len(huff_files) == 1
+
+
+# --- Decompress route ---
+
+@pytest.mark.integration
+def test_decompress_route_success(client, tmp_path):
+    """POST /decompress com arquivo .huff válido — restaura o arquivo original."""
+    from src.huffman.encoder import encode
+    from src.huffman.io import write_compressed
+    
+    original_data = b"hello world for decompress test!"
+    bitstring, tree = encode(original_data)
+    huff_path = str(tmp_path / "test.huff")
+    write_compressed(huff_path, tree, bitstring, "original.txt")
+    
+    with open(huff_path, 'rb') as f:
+        huff_content = f.read()
+    
+    data = {
+        "file": (io.BytesIO(huff_content), "test.huff"),
+    }
+    response = client.post(
+        "/decompress",
+        data=data,
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+
+
+@pytest.mark.integration
+def test_decompress_non_huff_file(client):
+    """POST /decompress com arquivo não-.huff — redireciona com erro."""
+    data = {
+        "file": (io.BytesIO(b"not a huff file"), "test.txt"),
+    }
+    response = client.post(
+        "/decompress",
+        data=data,
+        content_type="multipart/form-data",
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    assert b".huff" in response.data
+
+
+@pytest.mark.integration
+def test_decompress_no_file(client):
+    """POST /decompress sem arquivo — espera redirect com erro."""
+    response = client.post("/decompress", data={}, content_type="multipart/form-data")
+    assert response.status_code in (302, 400)

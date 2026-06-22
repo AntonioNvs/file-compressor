@@ -1,15 +1,21 @@
 """
-Fixtures e dados de teste reutilizáveis para testes de grande porte e Unicode.
+Fixtures e dados de teste reutilizáveis para testes de grande porte e binários.
 """
 import random
-import string
 
 
-def generate_large_text(size: int = 10_000, seed: int = 99) -> str:
-    """Gera um texto aleatório de `size` caracteres com seed fixo."""
+def generate_large_data(size: int = 10_000, seed: int = 99) -> bytes:
+    """Gera dados binários aleatórios de `size` bytes com seed fixo."""
     random.seed(seed)
-    return "".join(random.choices(string.printable, k=size))
+    return bytes(random.randint(0, 255) for _ in range(size))
 
 
-EMOJI_TEXT = "😀🎉👍🔥✨😎🙌💪🚀🌟"
-MIXED_SCRIPTS_TEXT = "Hello Привет 你好 مرحبا"
+def generate_large_text(size: int = 10_000, seed: int = 99) -> bytes:
+    """Gera texto aleatório de `size` bytes com seed fixo (ASCII printable)."""
+    import string
+    random.seed(seed)
+    return "".join(random.choices(string.printable, k=size)).encode("utf-8")
+
+
+EMOJI_TEXT = "😀🎉👍🔥✨😎🙌💪🚀🌟".encode("utf-8")
+MIXED_SCRIPTS_TEXT = "Hello Привет 你好 مرحبا".encode("utf-8")

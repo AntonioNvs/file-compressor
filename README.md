@@ -24,8 +24,25 @@ Sistema de compactação de arquivos de texto feito em Python + Interface Gráfi
 - **GitHub Actions**: Plataforma de CI/CD utilizada para rodar os testes automaticamente em uma matriz de múltiplos sistemas operacionais (Linux, macOS, Windows) e versões do Python.
 - **Codecov**: Ferramenta integrada ao CI para armazenar, analisar e disponibilizar publicamente o relatório de cobertura gerado pelos testes.
 
-## Como rodar os testes
+## Como executar a aplicação localmente
 
+Para iniciar a aplicação no seu computador e acessá-la no navegador:
+
+1. **Instale as dependências** do projeto:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Inicie o servidor Flask**:
+   Na raiz do projeto, execute:
+   ```bash
+   python run.py
+   ```
+
+3. **Acesse no navegador**:
+   Abra o navegador e acesse a URL: [http://localhost:5000](http://localhost:5000)
+
+## Como rodar os testes
 Para executar a suíte de testes do projeto e verificar a cobertura do código localmente, siga as instruções abaixo:
 
 1. **Instale as dependências** do projeto:
